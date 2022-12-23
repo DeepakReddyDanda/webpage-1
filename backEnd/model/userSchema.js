@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -25,6 +26,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+});
+
+//------------> Hashing password <------------------
+userSchema.pre("save", async function (next) {
+  // console.log("Hii");
+  const saltRounds = 12;
+  if (this.isModified("password")) {
+    // console.log("pre password");
+    this.password = await bcrypt.hash(this.password, saltRounds);
+    this.confirmPassword = await bcrypt.hash(this.confirmPassword, saltRounds);
+  }
+  next();
 });
 
 const User = mongoose.model("REGITRATIONS", userSchema);

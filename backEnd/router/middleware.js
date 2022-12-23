@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 
 require("../database/connection");
 const User = require("../model/userSchema");
@@ -59,6 +60,12 @@ router.post("/register", async (req, res) => {
     return res.status(422).json({ error: "plz fill all the fields" });
   }
 
+  if (password != confirmPassword) {
+    return res
+      .status(422)
+      .json({ error: "password and confirm password not matched" });
+  }
+
   try {
     const emailExist = await User.findOne({ email: email });
     if (emailExist) {
@@ -76,6 +83,7 @@ router.post("/register", async (req, res) => {
       password,
       confirmPassword,
     });
+
     await user.save();
     res.status(201).json({ message: "user registration successfull" });
   } catch (err) {
@@ -84,6 +92,7 @@ router.post("/register", async (req, res) => {
 });
 
 //-----------> login route <-------------
+
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,13 +100,16 @@ router.post("/signin", async (req, res) => {
       return res.status(400).json({ error: "Enter both the fields" });
     }
     const userLogin = await User.findOne({ email: email });
-    // console.log(userLogin);
-    if (!userLogin) {
-      res.status(400).json({ error: "Account not found please register" });
-    } else if (userLogin.password != password) {
-      res.status(400).json({ error: "Userid password not matched" });
+
+    if (userLogin) {
+      const passwordVerify = await bcrypt.compare(password, userLogin.password);
+      if (!passwordVerify) {
+        res.status(400).json({ error: "Invalid Credentials" });
+      } else {
+        res.json({ message: "User signin successfull" });
+      }
     } else {
-      res.json({ message: "User signin successfull" });
+      res.status(400).json({ error: "Invalid Credentials" });
     }
   } catch (err) {
     console.log(err);
