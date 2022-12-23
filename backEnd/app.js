@@ -35,10 +35,6 @@ app.get("/signin", (req, res) => {
   res.send("Hello this is signin page");
 });
 
-app.get("/signin", (req, res) => {
-  res.send("Hello this is signin page");
-});
-
 app.get("/signup", (req, res) => {
   res.send("Hello this is signup page");
 });
