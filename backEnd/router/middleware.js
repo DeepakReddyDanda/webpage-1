@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
@@ -103,6 +104,10 @@ router.post("/signin", async (req, res) => {
 
     if (userLogin) {
       const passwordVerify = await bcrypt.compare(password, userLogin.password);
+
+      const token = await userLogin.generateAuthToken();
+      console.log(token);
+
       if (!passwordVerify) {
         res.status(400).json({ error: "Invalid Credentials" });
       } else {
