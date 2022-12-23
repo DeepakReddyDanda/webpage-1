@@ -106,7 +106,11 @@ router.post("/signin", async (req, res) => {
       const passwordVerify = await bcrypt.compare(password, userLogin.password);
 
       const token = await userLogin.generateAuthToken();
-      console.log(token);
+      // console.log(token);
+      res.cookie("jwt", token, {
+        expires: new Date(Date.now() + 25892000000),
+        httpOnly: true,
+      });
 
       if (!passwordVerify) {
         res.status(400).json({ error: "Invalid Credentials" });
